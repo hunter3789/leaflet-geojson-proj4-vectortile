@@ -23,7 +23,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ```
 
 ## Usage
-1. Calculate min/max bounds of each polygons
+1. Calculate min/max bounds of each polygons from geojson
 ```
 getGeojsonBounds(map, geojson);
 ```
