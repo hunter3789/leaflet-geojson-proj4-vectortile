@@ -32,7 +32,7 @@ getGeojsonBounds(map, geojson);
 2. Draw Tiles
 
 ```
-L.geoJson.projvt(geojsonData, options).addTo(map);
+L.geoJson.projvt(geojson, options).addTo(map);
 
 options(example) : 
 {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
