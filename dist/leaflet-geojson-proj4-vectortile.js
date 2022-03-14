@@ -19,7 +19,6 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
     options.tolerance = options.tolerance !== undefined ? options.tolerance : 0.5;
     options.highestQuality = options.highestQuality !== undefined ? options.highestQuality : false;
 
-    console.log(options);
     L.setOptions(this, options);
     L.GridLayer.prototype.initialize.call(this, options);
 
