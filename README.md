@@ -18,7 +18,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 - Quick use:
 
 ```js
-```
+<script src="[path to js]/leaflet-geojson-proj4-vectortile.js"></script>
 
 ## Usage
 
