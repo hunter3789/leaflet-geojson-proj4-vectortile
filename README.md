@@ -29,7 +29,7 @@ getGeojsonBounds(map, geojson);
 ```
 
 
-2. Draw Tiles
+2. Draw Tiles (draw polygons in which boundaries and tiles overlap.)
 
 ```
 L.geoJson.projvt(geojson, options).addTo(map);
