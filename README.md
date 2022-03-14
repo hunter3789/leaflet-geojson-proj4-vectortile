@@ -25,7 +25,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ## Usage
 1. Calculate min/max bounds of each polygons
 ```
-var newGeojson = getGeojsonBounds(map, geojson);
+getGeojsonBounds(map, geojson);
 ```
 
 
