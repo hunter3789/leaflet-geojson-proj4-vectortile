@@ -8,15 +8,18 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
   },
 
   initialize: function (geojson, options) {
+    options.stroke = options.stroke !== undefined ? options.stroke : true;
     options.color = options.color !== undefined ? options.color : "#000000";
     options.weight = options.weight !== undefined ? options.weight : 1;
     options.opacity = options.opacity !== undefined ? options.opacity : 1;
+    options.fill = options.fill !== undefined ? options.fill : true;
     options.fillColor = options.fillColor !== undefined ? options.fillColor : "#ffffff";
     options.fillOpacity = options.fillOpacity !== undefined ? options.fillOpacity : 1;
     options.simplify = options.simplify !== undefined ? options.simplify : false;
     options.tolerance = options.tolerance !== undefined ? options.tolerance : 0.5;
     options.highestQuality = options.highestQuality !== undefined ? options.highestQuality : false;
 
+    console.log(options);
     L.setOptions(this, options);
     L.GridLayer.prototype.initialize.call(this, options);
 
@@ -114,11 +117,11 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
     }
 
     ctx.closePath();
-    if (options.fillOpacity > 0) {
+    if (options.fill) {
       ctx.globalAlpha = options.fillOpacity;
       ctx.fill();
     }
-    if (options.weight > 0) {
+    if (options.stroke && options.weight !== 0) {
       ctx.globalAlpha = options.opacity;
       ctx.stroke();
     }
