@@ -28,7 +28,13 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 var newGeojson = getGeojsonBounds(map, geojson);
 ```
 
-2.
+
+2. Draw Tiles
+
+```
+L.geoJson.projvt(geojsonData, options).addTo(map);
+options
+```
 
 3.
 
