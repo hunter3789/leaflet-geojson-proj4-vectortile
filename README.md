@@ -1,6 +1,7 @@
 # leaflet-geojson-proj4-vectortile
 
 It is a open-source leaflet plugin which generate the vector tiles for geojson data in proj4 coordinates.
+(support only for polygon and multipolygon at this time)
 
 ## Dependency
 - [leaflet] (https://leafletjs.com/)
@@ -22,7 +23,14 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ```
 
 ## Usage
+1. Calculate min/max bounds of each polygons
+```
+var newGeojson = getGeojsonBounds(map, geojson);
+```
 
+2.
+
+3.
 
 ## License
 
