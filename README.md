@@ -13,7 +13,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ## Demo
 
 [DEMO] (https://hunter3789.github.io/leaflet-geojson-proj4-vectortile/example/demo.html)
-- geojson data are from https://geojson-maps.ash.ms/
+- geojson data is from https://geojson-maps.ash.ms/
 
 ## Installation and setup
 
