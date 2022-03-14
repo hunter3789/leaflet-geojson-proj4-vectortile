@@ -23,7 +23,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ```
 
 ## Usage
-0. Slice geojson data by longitude(**if needed, for certain projection, usually don't need**)
+0. Slice geojson data by longitude (**if needed, for certain projection, usually don't need**)
 ```
 var newGeojson = sliceGeojson(geojson, longitude);
 ```
