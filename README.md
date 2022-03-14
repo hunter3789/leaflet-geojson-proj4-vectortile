@@ -44,7 +44,7 @@ options(example) :
 
 3. Slice geojson data by longitude(for certain projection)
 ```
-var newGeojson = sliceGeojson(geojsonData, longitude);
+var newGeojson = sliceGeojson(geojson, longitude);
 ```
 
 ## License
