@@ -34,10 +34,11 @@ getGeojsonBounds(map, geojson);
 ```
 L.geoJson.projvt(geojsonData, options).addTo(map);
 
-options(example)
+options(example) : 
 {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
 
-if opionts.simplify is true, you need simplify.js(optional)
+- select proper tileSize for better performance
+- if opionts.simplify is true, you need simplify.js(optional)
 ```
 
 3. Slice geojson data by longitude(for certain projection)
