@@ -138,7 +138,10 @@ L.geoJson.projvt = function (geojson, options) {
 
 function getGeojsonBounds(map, geojson) {
   for (var i=0; i<geojson.features.length; i++) {
-    var xmax, ymax, xmin, ymin;
+    var xmax = null;
+    var ymax = null;
+    var xmin = null;
+    var ymin = null;
 
     if (geojson.features[i].geometry.type == "MultiPolygon") {
       for (var j=0; j<geojson.features[i].geometry.coordinates.length; j++) {
@@ -154,19 +157,19 @@ function getGeojsonBounds(map, geojson) {
 
             var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][l][1], geojson.features[i].geometry.coordinates[j][k][l][0]]), 0);
 
-            if (xmax <= point.x || xmax == undefined) {
+            if (xmax <= point.x || xmax === null) {
               xmax = point.x;
             }
 
-            if (xmin >= point.x || xmin == undefined) {
+            if (xmin >= point.x || xmin === null) {
               xmin = point.x;
             }
 
-            if (ymax <= point.y || ymax == undefined) {
+            if (ymax <= point.y || ymax === null) {
               ymax = point.y;
             }
 
-            if (ymin >= point.y || ymin == undefined) {
+            if (ymin >= point.y || ymin === null) {
               ymin = point.y;
             }
           }
@@ -191,19 +194,19 @@ function getGeojsonBounds(map, geojson) {
 
           var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][1], geojson.features[i].geometry.coordinates[j][k][0]]), 0);
 
-          if (xmax <= point.x || xmax == undefined) {
+          if (xmax <= point.x || xmax === null) {
             xmax = point.x;
           }
 
-          if (xmin >= point.x || xmin == undefined) {
+          if (xmin >= point.x || xmin === null) {
             xmin = point.x;
           }
 
-          if (ymax <= point.y || ymax == undefined) {
+          if (ymax <= point.y || ymax === null) {
             ymax = point.y;
           }
 
-          if (ymin >= point.y || ymin == undefined) {
+          if (ymin >= point.y || ymin === null) {
             ymin = point.y;
           }
         }
@@ -214,6 +217,7 @@ function getGeojsonBounds(map, geojson) {
       geojson.features[i].properties.ymax = ymax;
       geojson.features[i].properties.ymin = ymin;
     }
+
   }
 
   return geojson;
