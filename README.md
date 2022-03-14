@@ -39,7 +39,7 @@ options(example) :
 ```
 
 - select proper tileSize for better performance
-- if opionts.simplify is true, you need simplify.js(optional)
+- if options.simplify is true, you need simplify.js(optional) / tolerance and highestQuality options are also for simplification(optional).
 
 
 3. Slice geojson data by longitude(for certain projection)
