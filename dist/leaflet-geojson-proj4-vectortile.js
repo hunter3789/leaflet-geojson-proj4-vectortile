@@ -1,6 +1,6 @@
 /*
  (c) 2022, Chang-jae, Lee
- leaflet vector tile js for geojson in proj4 coordinates
+ leaflet vector tile plugin for geojson in proj4 coordinates
  https://github.com/hunter3789/leaflet-geojson-proj4-vectortile
 */
 L.GeoJSON.ProjVT = L.GridLayer.extend({
@@ -144,6 +144,14 @@ function getGeojsonBounds(map, geojson) {
       for (var j=0; j<geojson.features[i].geometry.coordinates.length; j++) {
         for (var k=0; k<geojson.features[i].geometry.coordinates[j].length; k++) {
           for (var l=0; l<geojson.features[i].geometry.coordinates[j][k].length; l++) {
+            if (geojson.features[i].geometry.coordinates[j][k][l][1] >= 90) {
+              geojson.features[i].geometry.coordinates[j][k][l][1] = 89.999999;
+            }
+
+            if (geojson.features[i].geometry.coordinates[j][k][l][1] <= -90) {
+              geojson.features[i].geometry.coordinates[j][k][l][1] = -89.999999;
+            }
+
             var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][l][1], geojson.features[i].geometry.coordinates[j][k][l][0]]), 0);
 
             if (xmax <= point.x || xmax == undefined) {
@@ -173,6 +181,14 @@ function getGeojsonBounds(map, geojson) {
     else if (geojson.features[i].geometry.type == "Polygon") {
       for (var j=0; j<geojson.features[i].geometry.coordinates.length; j++) {
         for (var k=0; k<geojson.features[i].geometry.coordinates[j].length; k++) {
+          if (geojson.features[i].geometry.coordinates[j][k][1] >= 90) {
+            geojson.features[i].geometry.coordinates[j][k][1] = 89.999999;
+          }
+
+          if (geojson.features[i].geometry.coordinates[j][k][1] <= -90) {
+            geojson.features[i].geometry.coordinates[j][k][1] = -89.999999;
+          }
+
           var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][1], geojson.features[i].geometry.coordinates[j][k][0]]), 0);
 
           if (xmax <= point.x || xmax == undefined) {
