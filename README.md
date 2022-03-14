@@ -28,7 +28,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ```
 var newGeojson = sliceGeojson(geojson, longitude);
 
-- projection(example) : "+proj=eqc +lat_0=0 +lat_ts=0 +lon_0=126 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
+// projection(example) : "+proj=eqc +lat_0=0 +lat_ts=0 +lon_0=126 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
 ```
 1. **Calculate min/max bounds of each polygons from geojson**
 ```
@@ -39,7 +39,7 @@ getGeojsonBounds(map, geojson);
 ```
 L.geoJson.projvt(geojson, options).addTo(map);
 
-- options(example) : {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
+// options(example) : {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
 ```
 - **select proper tileSize** for better performance
 - if options.simplify is true, you need simplify.js(optional) / tolerance and highestQuality options are also for simplification(optional).
