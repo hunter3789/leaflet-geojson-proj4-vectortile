@@ -30,23 +30,17 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 ```
 var newGeojson = sliceGeojson(geojson, longitude);
 ```
-
 1. **Calculate min/max bounds of each polygons from geojson**
 ```
 getGeojsonBounds(map, geojson);
 ```
-
-
 2. **Draw Tiles (draw polygons in which boundaries and tiles overlap.)**
 
 ```
 L.geoJson.projvt(geojson, options).addTo(map);
 ```
-
 - options(example) : 
 {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
-
-
 - **select proper tileSize** for better performance
 - if options.simplify is true, you need simplify.js(optional) / tolerance and highestQuality options are also for simplification(optional).
 
