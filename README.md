@@ -38,7 +38,7 @@ options(example) :
 {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
 ```
 
-- select proper tileSize for better performance
+- **select proper tileSize** for better performance
 - if options.simplify is true, you need simplify.js(optional) / tolerance and highestQuality options are also for simplification(optional).
 
 
