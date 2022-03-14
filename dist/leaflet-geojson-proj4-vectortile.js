@@ -1,7 +1,7 @@
 /*
  (c) 2022, Chang-jae, Lee
  leaflet vector tile js for geojson in proj4 coordinates
- https://github.com/hunter3789/geojson
+ https://github.com/hunter3789/leaflet-geojson-proj4-vectortile
 */
 L.GeoJSON.ProjVT = L.GridLayer.extend({
   options: {
@@ -120,7 +120,8 @@ L.geoJson.projvt = function (geojson, options) {
 };
 
 
-// calculate bounds of each polygons at certain map projection
+
+// function: calculate bounds of each polygons at certain map projection
 (function () { 'use strict';
 
 
@@ -204,7 +205,7 @@ else window.getGeojsonBounds = getGeojsonBounds;
 
 
 
-// slice geojson data by longitude
+// function: slice geojson data by longitude
 (function () { 'use strict';
 
 
