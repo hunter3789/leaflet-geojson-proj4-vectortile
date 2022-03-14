@@ -9,7 +9,7 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 
 ## Demo
 
-[DEMO]
+[DEMO] https://hunter3789.github.io/leaflet-geojson-proj4-vectortile/example/demo.html
 
 ## Installation and setup
 
