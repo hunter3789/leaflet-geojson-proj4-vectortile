@@ -30,13 +30,13 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 var newGeojson = sliceGeojson(geojson, longitude);
 ```
 
-1. Calculate min/max bounds of each polygons from geojson
+**1. Calculate min/max bounds of each polygons from geojson**
 ```
 getGeojsonBounds(map, geojson);
 ```
 
 
-2. Draw Tiles (draw polygons in which boundaries and tiles overlap.)
+**2. Draw Tiles (draw polygons in which boundaries and tiles overlap.)**
 
 ```
 L.geoJson.projvt(geojson, options).addTo(map);
