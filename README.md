@@ -25,7 +25,8 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 
 ## Usage
 0. Slice geojson data by longitude (**if needed, for certain projection, usually don't need**)
-\n(example) projection: +proj=eqc +lat_0=0 +lat_ts=0 +lon_0=126 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs
+
+(example) projection: +proj=eqc +lat_0=0 +lat_ts=0 +lon_0=126 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs
 ```
 var newGeojson = sliceGeojson(geojson, longitude);
 ```
