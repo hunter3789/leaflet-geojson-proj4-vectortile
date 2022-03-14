@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css">
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet-src.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/proj4@2.8.0/dist/proj4.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/proj4leaflet@1.0.2/src/proj4leaflet.js"></script>
+  <script type="text/javascript" src="./L.Graticule.js"></script>
+  <script type="text/javascript" src="./simplify.js"></script>
+  <script type="text/javascript" src="../dist/leaflet-geojson-proj4-vectortile.js"></script>
+
+  <style>
+    html,
+    body {
+      height: 95%;
+    }
+
+    #map {
+      height: 100%; width: 95vw;
+      background: #e5ffff;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div style="display:flex; padding:4px 0px 10px 0px;">
+    <div>projection :</div>
+    <div style='min-width:8px;'></div>
+    <div class='select-style'>
+      <select id=projection onchange="map_init();">
+        <option value="EPSG:2154,+proj=lcc +lat_1=30 +lat_2=60 +lat_0=0 +lon_0=126 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs,10000,40,126">Lambert Conformal Conic</option>
+        <option value="EPSG:3031,+proj=Polar_Stereographic +lat_0=90 +lat_ts=90 +lon_0=120 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs,20000,90,120">Polar Stereographic</option>
+        <option value="EPSG:32662,+proj=eqc +lat_0=0 +lat_ts=0 +lon_0=126 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs,25000,0,126">Equidistant Cylindrical</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="height: 95%; width: 95vw; border:1px solid black;">
+    <div id="map"></div>
+  </div>
+
+
+  <script>
+
+  var map;
+  var geojsonData, geojsonWorldData;
+  var geojsonVectorTile, vectorTile;
+  var mapPaneName1, mapPaneName2, mapPaneName3;
+
+  map_init(map);
+
+  function map_init() {
+    var projection = document.getElementById("projection").value.toString().split(',');
+    var resolutions = [];
+    for (var z=0; z<=8; z++) {
+      resolutions[z] = parseFloat(projection[2])/Math.pow(1.5,z);
+    }
+    var lat_0 = parseFloat(projection[3]);
+    var lon_0 = parseFloat(projection[4]);
+
+    var lcc_crs = new L.Proj.CRS(projection[0], projection[1],
+      {
+          resolutions: resolutions
+      }
+    );
+
+    if (map == undefined) {
+      map = L.map('map', {
+          maxZoom: 8,
+          minZoom: 0,
+          crs: lcc_crs
+      }).setView([40, 120], 0);
+
+      mapPaneName1 = "geojson";
+      mapPaneName2 = "graticule";
+
+      map.createPane(mapPaneName1);
+      map.createPane(mapPaneName2);
+
+      map.getPane(mapPaneName1).style.zIndex = 0;
+      map.getPane(mapPaneName2).style.zIndex = 100;
+
+      map.getPane(mapPaneName1).style.pointerEvents = 'none';
+      map.getPane(mapPaneName2).style.pointerEvents = 'none';
+
+      canvas = L.canvas({pane: "graticule", padding: 1.5});
+
+      L.graticule({ interval:20, style:{dashArray:'4,4', color:'#333', weight:1}, renderer: canvas }).addTo(map);
+
+      var tiles = new L.GridLayer({tileSize:512, pane:mapPaneName2});
+      tiles.createTile = function(coords) {
+        var tile = L.DomUtil.create('canvas', 'leaflet-tile');
+        var ctx = tile.getContext('2d');
+        var size = this.getTileSize()
+        tile.width = size.x
+        tile.height = size.y
+  
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillRect(0, 0, size.x, 25);
+        ctx.fillStyle = 'black';
+        ctx.fillText('x: ' + coords.x + ', y: ' + coords.y + ', zoom: ' + coords.z, 10, 15);
+        ctx.strokeStyle = 'red';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(size.x-1, 0);
+        ctx.lineTo(size.x-1, size.y-1);
+        ctx.lineTo(0, size.y-1);
+        ctx.closePath();
+        ctx.stroke();
+
+        return tile;
+      }
+      tiles.addTo(map);
+
+      fnGeoJson(map, mapPaneName1);
+    }
+    else {
+      if (geojsonVectorTile != undefined && geojsonVectorTile._leaflet_id != undefined) {
+        map.removeLayer(geojsonVectorTile);
+      }
+      map.options.crs = lcc_crs;
+      map.fire('viewreset');
+
+      var data = geojsonData;
+      for (var i=0; i<document.getElementById("projection").length; i++) {
+        if (document.getElementById("projection")[i].selected && document.getElementById("projection")[i].innerText == "Equidistant Cylindrical") {
+          var data = geojsonWorldData;
+        }
+      }
+       
+      getGeojsonBounds(map, data);
+      geojsonVectorTile = L.geoJson.projvt(data, {tileSize:512, pane:mapPaneName1, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
+      geojsonVectorTile.addTo(map);
+      map.setView([lat_0, lon_0], 0, {animate:false});
+      map.fire('viewreset');
+    }
+  }
+
+  function fnGeoJson(map, pane) {
+    var url = "https://raw.githubusercontent.com/hunter3789/geojson/main/custom.geo.50m.json";
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.timeout = 60000;
+    xhr.overrideMimeType("application/json; charset=utf-8");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState != 4 || xhr.status != 200) return;
+      else  {
+        geojsonData = JSON.parse(xhr.responseText);
+
+        getGeojsonBounds(map, geojsonData);
+        geojsonVectorTile = L.geoJson.projvt(geojsonData, {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
+        geojsonVectorTile.addTo(map);
+        geojsonWorldData = sliceGeojson(geojsonData, 126);
+      }
+    };
+    xhr.send();
+  }
+
+  </script>
+</body>
+
+</html>
