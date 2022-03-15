@@ -1,6 +1,6 @@
 # leaflet-geojson-proj4-vectortile
 
-It is a open-source leaflet plugin which generate the vector tiles for geojson data in proj4 coordinates.
+It is a open-source leaflet plugin which generate the vector tiles(canvas) for geojson data in proj4 coordinates.
 (support only for polygon and multipolygon at this time)
 
 ## Dependency
