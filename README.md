@@ -40,7 +40,7 @@ L.geoJson.projvt(geojson, options).addTo(map);
 // options(example) : {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1}
 ```
 - **select proper tileSize** for better performance
-- (optional) simplify option is for polyline simplification, tolerance option is smooth parameter.
+- simplify option is for polyline simplification, tolerance option is smooth parameter.
 
 ## License
 
