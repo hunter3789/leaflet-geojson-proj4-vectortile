@@ -7,8 +7,6 @@ It is a open-source leaflet plugin which generate the vector tiles for geojson d
 - [leaflet] (https://leafletjs.com/)
 - [proj4js] (https://github.com/proj4js/proj4js)
 - [proj4leaflet] (https://kartena.github.io/Proj4Leaflet/)
-- [simplify.js(optional)] (https://github.com/mourner/simplify-js) / JavaScript polyline simplification library by Vladimir Agafonkin, extracted from Leaflet.
-
 
 ## Demo
 
@@ -39,10 +37,10 @@ getGeojsonBounds(map, geojson);
 ```
 L.geoJson.projvt(geojson, options).addTo(map);
 
-// options(example) : {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1, highestQuality:true}
+// options(example) : {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1}
 ```
 - **select proper tileSize** for better performance
-- if options.simplify is true, you need simplify.js(optional) / tolerance and highestQuality options are also for simplification(optional).
+- (optional) simplify option is for polyline simplification, tolerance option is smooth parameter.
 
 ## License
 
