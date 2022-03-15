@@ -17,7 +17,6 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
     options.fillOpacity = options.fillOpacity !== undefined ? options.fillOpacity : 1;
     options.simplify = options.simplify !== undefined ? options.simplify : false;
     options.tolerance = options.tolerance !== undefined ? options.tolerance : 0.5;
-    options.highestQuality = options.highestQuality !== undefined ? options.highestQuality : false;
 
     L.setOptions(this, options);
     L.GridLayer.prototype.initialize.call(this, options);
@@ -78,7 +77,7 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
           }
 
           if (options.simplify == true) {
-            polygon = simplify(polygon, options.tolerance, options.highestQuality);
+            polygon = L.LineUtil.simplify(polygon, options.tolerance);
           }
 
           for (var n = 0; n < polygon.length; n ++) {
@@ -101,7 +100,7 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
         }
 
         if (options.simplify == true) {
-          polygon = simplify(polygon, options.tolerance, options.highestQuality);
+          polygon = L.LineUtil.simplify(polygon, options.tolerance);
         }
 
         for (var n = 0; n < polygon.length; n++) {
