@@ -17,30 +17,37 @@
     }
 
     #map {
-      height: 95vh; width: calc(95vw - 300px);
+      height: 95vh; width: 95vw;
       background: #e5ffff;
+    }
+
+    #uiCanvas {
+      /* Prevents the browser from scrolling or zooming when touching the canvas */
+      touch-action: none; 
+      /* Standard mobile optimization */
+      -webkit-tap-highlight-color: transparent;
     }
 
   </style>
 </head>
 
 <body>
-  <div style="display:flex; padding:4px 0px 10px 0px;">
-    <div style="height: 95vh; width: calc(95vw - 300px); border:1px solid black;">
+  <div style="padding:4px 0px 10px 0px;">
+    <div style="height: 95vh; width: 95vw; border:1px solid black;">
       <div id="map"></div>
     </div>
+  </div>
 
-    <div id="control" style="width:300px; padding-left:10px;">
+    <div id="control" style="position:fixed; top:20px; left:15px; display:block; border:1px solid black; background-color:#ffffff; padding:10px; z-index:1000;">
       <div style="height:10px;"></div>
       <div style="margin:0 0 5px 0; display:flex;">
         Standard Longitude Controller (Drag & Drop)
       </div>
-      <div id="mapWrap" style="position:relative; width:300px; height:300px;">
-        <canvas id="mapCanvas" width="300px" height="300px" style="position:absolute; inset:0;"></canvas>
-        <canvas id="uiCanvas"  width="300px" height="300px" style="position:absolute; inset:0; pointer-events:auto;"></canvas>
+      <div id="mapWrap" style="position:relative; width:280px; height:280px;">
+        <canvas id="mapCanvas" width="280px" height="280px" style="position:absolute; inset:0;"></canvas>
+        <canvas id="uiCanvas"  width="280px" height="280px" style="position:absolute; inset:0; pointer-events:auto;"></canvas>
       </div>
     </div>
-  </div>
 
 
   <script>
@@ -364,8 +371,12 @@
     // ---- Events ----
     function getMouse(e) {
       const rect = ui.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) * (ui.width / rect.width);
-      const my = (e.clientY - rect.top) * (ui.height / rect.height);
+      // Use .touches[0] if it's a touch event, otherwise use the event itself
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      
+      const mx = (clientX - rect.left) * (ui.width / rect.width);
+      const my = (clientY - rect.top) * (ui.height / rect.height);
       return { mx, my };
     }
 
@@ -380,6 +391,19 @@
         renderUI();
       }
     }
+
+    // Prevent default behavior to stop "pull-to-refresh" or scrolling
+    ui.addEventListener("touchstart", (e) => {
+      if (isOnRing(getMouse(e).mx, getMouse(e).my)) {
+        e.preventDefault(); 
+      }
+    }, { passive: false });
+
+    ui.addEventListener("touchmove", (e) => {
+      if (dragging) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
     ui.addEventListener("pointerdown", (e) => {
       const { mx, my } = getMouse(e);
