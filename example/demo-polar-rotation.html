@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css">
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet-src.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/proj4@2.8.0/dist/proj4.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/proj4leaflet@1.0.2/src/proj4leaflet.js"></script>
+  <script type="text/javascript" src="./L.Graticule.js"></script>
+  <script type="text/javascript" src="../dist/leaflet-geojson-proj4-vectortile.js"></script>
+
+  <style>
+    html,
+    body {
+      height: 95%;
+    }
+
+    #map {
+      height: 95vh; width: calc(95vw - 300px);
+      background: #e5ffff;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div style="display:flex; padding:4px 0px 10px 0px;">
+    <div style="height: 95vh; width: calc(95vw - 300px); border:1px solid black;">
+      <div id="map"></div>
+    </div>
+
+    <div id="control" style="width:300px; padding-left:10px;">
+      <div style="height:10px;"></div>
+      <div style="margin:0 0 5px 0; display:flex;">
+        Standard Longitude Controller (Drag & Drop)
+      </div>
+      <div id="mapWrap" style="position:relative; width:300px; height:300px;">
+        <canvas id="mapCanvas" width="300px" height="300px" style="position:absolute; inset:0;"></canvas>
+        <canvas id="uiCanvas"  width="300px" height="300px" style="position:absolute; inset:0; pointer-events:auto;"></canvas>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+
+  var map;
+  var geojsonData, geojsonWorldData;
+  var geojsonVectorTile, vectorTile;
+  var mapPaneName1, mapPaneName2;
+  var standardLon = 120.0;
+
+  map_init(map);
+  fnInitMapCtrl();
+
+  function map_init() {
+    var crs = "EPSG:3031";
+    var projection = "+proj=Polar_Stereographic +lat_0=90 +lat_ts=90 +lon_0=" + parseInt(standardLon).toString() + " +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs";
+    var initRes = 45000.0;
+    var resolutions = [];
+    for (var z=0; z<=8; z++) {
+      resolutions[z] = initRes/Math.pow(1.5,z);
+    }
+    var lat_0 = 90.;
+    var lon_0 = 120.;
+
+    var lcc_crs = new L.Proj.CRS(crs, projection,
+      {
+          resolutions: resolutions
+      }
+    );
+
+    if (map == undefined) {
+      map = L.map('map', {
+          maxZoom: 8,
+          minZoom: 0,
+          crs: lcc_crs
+      }).setView([lat_0, lon_0], 0);
+
+      mapPaneName1 = "geojson";
+      mapPaneName2 = "graticule";
+
+      map.createPane(mapPaneName1);
+      map.createPane(mapPaneName2);
+
+      map.getPane(mapPaneName1).style.zIndex = 0;
+      map.getPane(mapPaneName2).style.zIndex = 100;
+
+      map.getPane(mapPaneName1).style.pointerEvents = 'none';
+      map.getPane(mapPaneName2).style.pointerEvents = 'none';
+
+      canvas = L.canvas({pane: "graticule", padding: 1.5});
+
+      L.graticule({ interval:20, style:{dashArray:'4,4', color:'#333', weight:1}, renderer: canvas }).addTo(map);
+
+      var tiles = new L.GridLayer({tileSize:512, pane:mapPaneName2});
+      tiles.createTile = function(coords) {
+        var tile = L.DomUtil.create('canvas', 'leaflet-tile');
+        var ctx = tile.getContext('2d');
+        var size = this.getTileSize()
+        tile.width = size.x
+        tile.height = size.y
+  
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillRect(0, 0, size.x, 25);
+        ctx.fillStyle = 'black';
+        ctx.fillText('x: ' + coords.x + ', y: ' + coords.y + ', zoom: ' + coords.z, 10, 15);
+        ctx.strokeStyle = 'red';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(size.x-1, 0);
+        ctx.lineTo(size.x-1, size.y-1);
+        ctx.lineTo(0, size.y-1);
+        ctx.closePath();
+        ctx.stroke();
+
+        return tile;
+      }
+      tiles.addTo(map);
+
+      fnGeoJson(map, mapPaneName1);
+    }
+    else {
+      if (geojsonVectorTile != undefined && geojsonVectorTile._leaflet_id != undefined) {
+        map.removeLayer(geojsonVectorTile);
+      }
+      map.options.crs = lcc_crs;
+      map.fire('viewreset');
+
+      var data = geojsonData;
+       
+      getGeojsonBounds(map, data);
+      geojsonVectorTile = L.geoJson.projvt(data, {tileSize:512, pane:mapPaneName1, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
+      geojsonVectorTile.addTo(map);
+      map.fire('viewreset');
+    }
+  }
+
+  function fnGeoJson(map, pane) {
+    var url = "https://raw.githubusercontent.com/hunter3789/geojson/main/custom.geo.50m.json";
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.timeout = 60000;
+    xhr.overrideMimeType("application/json; charset=utf-8");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState != 4 || xhr.status != 200) return;
+      else  {
+        geojsonData = JSON.parse(xhr.responseText);
+
+        getGeojsonBounds(map, geojsonData);
+        geojsonVectorTile = L.geoJson.projvt(geojsonData, {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
+        geojsonVectorTile.addTo(map);
+        geojsonWorldData = sliceGeojson(geojsonData, 126);
+      }
+    };
+    xhr.send();
+  };
+
+  function fnInitMapCtrl() {
+    const ui = document.getElementById("uiCanvas");
+    const uictx = ui.getContext("2d");
+
+    // ---- Configuration ----
+    const SNAP_DEG = 5;            // snapping step (deg)
+    const RING_ALPHA_IDLE = 0.18;  // when not hovering/dragging
+    const RING_ALPHA_HOT  = 0.45;  // when hovering/dragging
+    const KNOB_R = 7;              // knob radius (px)
+    const HIT_PAD = 14;            // extra hit padding for ring (px)
+    const LABEL_PAD = 12;          // label offset from knob (px)
+    const BASE_THEATA = 120;       // base standard longitude setting. see polar.png
+
+    // Pole location: assume pole at canvas center (common for hemi view).
+    // If your pole isn't exactly centered, set cx/cy accordingly.
+    let cx = ui.width / 2;
+    let cy = ui.height / 2;
+
+    // Choose a radius that doesn't block your central annotations
+    let ringR = Math.min(ui.width, ui.height) * 0.42;
+
+    // UI state
+    let lambda0 = 0;             // degrees [0,360)
+    let dragging = false;
+    let hover = false;
+
+    // Expose a hook for your rendering pipeline
+    function onLambda0Change(newLambda0) {
+      // TODO: call your map redraw
+      // e.g., redrawMapWithCentralLongitude(newLambda0);
+      // console.log("lambda0 =", newLambda0);
+      standardLon = Math.round(norm360(newLambda0+BASE_THEATA));
+    }
+
+    // ---- Helpers ----
+    function norm360(deg) {
+      deg = deg % 360;
+      return deg < 0 ? deg + 360 : deg;
+    }
+
+    // Angle convention:
+    // Canvas atan2 gives 0 at +x (right), increasing CCW.
+    // Convert:
+    //   theta = atan2(dy, dx) in radians (CCW from +x)
+    //   degFromRightCCW = theta * 180/pi
+    // We want degFromUpCW:
+    //   degFromUpCW = norm360(90 - degFromRightCCW)
+    function mouseToDeg(mx, my) {
+      const dx = mx - cx;
+      const dy = my - cy;
+      const theta = Math.atan2(dy, dx);
+      const degFromRightCCW = theta * 180 / Math.PI;
+      return norm360(90 - degFromRightCCW);
+    }
+
+    // Convert lambda0 (degFromUpCW) back to a point on ring
+    function degToPoint(deg) {
+      // Invert above transform:
+      // degFromUpCW = 90 - degFromRightCCW  => degFromRightCCW = 90 - degFromUpCW
+      const degFromRightCCW = 90 - deg;
+      const rad = degFromRightCCW * Math.PI / 180;
+      return {
+        x: cx + ringR * Math.cos(rad),
+        y: cy + ringR * Math.sin(rad)
+      };
+    }
+
+    function dist(ax, ay, bx, by) {
+      const dx = ax - bx, dy = ay - by;
+      return Math.hypot(dx, dy);
+    }
+
+    function isOnRing(mx, my) {
+      const d = dist(mx, my, cx, cy);
+      return Math.abs(d - ringR) <= HIT_PAD;
+    }
+
+    function degLabel(deg) {
+      // You can switch to E/W if you prefer:
+      // 0=N/Greenwich-centered meaning depends on your projection convention.
+      // Here we just display 0..359
+      const v = Math.round(norm360(deg+BASE_THEATA));
+      return `${v}` + "\u00B0";
+    }
+
+    // ---- Drawing ----
+    function clearUI() {
+      uictx.clearRect(0, 0, ui.width, ui.height);
+    }
+
+    function drawGhostRing() {
+      const alpha = (dragging || hover) ? RING_ALPHA_HOT : RING_ALPHA_IDLE;
+
+      if (bgReady) {
+        uictx.save();
+    
+        // Clip to circle
+        uictx.beginPath();
+        uictx.arc(cx, cy, ringR, 0, Math.PI * 2);
+        uictx.clip();
+    
+        // Subtle opacity so it doesn't fight the data
+        uictx.globalAlpha = 0.75;
+    
+        // Draw centered & scaled
+        const size = ringR * 2;
+        uictx.drawImage(bgImg, cx - ringR, cy - ringR, size, size);
+    
+        uictx.restore();
+      }
+
+      // ring
+      uictx.save();
+      uictx.globalAlpha = alpha;
+      uictx.lineWidth = 2;
+      uictx.setLineDash([6, 10]);
+      uictx.strokeStyle = "#333"; // neutral gray
+      uictx.beginPath();
+      uictx.arc(cx, cy, ringR, 0, Math.PI * 2);
+      uictx.stroke();
+
+      // indicator radial line
+      uictx.setLineDash([]);
+      uictx.lineWidth = 2;
+      uictx.strokeStyle = "#333";
+      const p = degToPoint(lambda0);
+      uictx.beginPath();
+      uictx.moveTo(cx, cy);
+      uictx.lineTo(p.x, p.y);
+      uictx.stroke();
+
+      uictx.restore();
+
+      // knob (slightly stronger than ring)
+      uictx.save();
+      uictx.globalAlpha = (dragging || hover) ? 0.9 : 0.65;
+      uictx.fillStyle = "#111";
+      uictx.beginPath();
+      uictx.arc(p.x, p.y, KNOB_R, 0, Math.PI * 2);
+      uictx.fill();
+
+      // small white inner dot to help visibility on dark fields
+      uictx.globalAlpha = (dragging || hover) ? 0.85 : 0.6;
+      uictx.fillStyle = "#fff";
+      uictx.beginPath();
+      uictx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
+      uictx.fill();
+      uictx.restore();
+
+      // label near knob
+      drawLabelNearKnob(p.x, p.y);
+    }
+
+    function drawLabelNearKnob(kx, ky) {
+      const alpha = (dragging || hover) ? 0.95 : 0.70;
+
+      const text = degLabel(lambda0);
+      uictx.save();
+      uictx.globalAlpha = alpha;
+      uictx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+      uictx.textBaseline = "middle";
+
+      // Place label slightly outward from knob
+      const vx = kx - cx, vy = ky - cy;
+      const len = Math.max(1, Math.hypot(vx, vy));
+      const ox = (vx / len) * LABEL_PAD;
+      const oy = (vy / len) * LABEL_PAD;
+
+      const tx = kx + ox;
+      const ty = ky + oy;
+
+      // background pill
+      const paddingX = 8, paddingY = 5;
+      const metrics = uictx.measureText(text);
+      const w = metrics.width + paddingX * 2;
+      const h = 20;
+
+      uictx.fillStyle = "rgba(255,255,255,0.85)";
+      roundRect(uictx, tx - w / 2, ty - h / 2, w, h, 10);
+      uictx.fill();
+
+      // text
+      uictx.fillStyle = "#111";
+      uictx.fillText(text, tx - metrics.width / 2, ty);
+
+      uictx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rr);
+      ctx.arcTo(x + w, y + h, x, y + h, rr);
+      ctx.arcTo(x, y + h, x, y, rr);
+      ctx.arcTo(x, y, x + w, y, rr);
+      ctx.closePath();
+    }
+
+    function renderUI() {
+      clearUI();
+      drawGhostRing();
+    }
+
+    // ---- Events ----
+    function getMouse(e) {
+      const rect = ui.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (ui.width / rect.width);
+      const my = (e.clientY - rect.top) * (ui.height / rect.height);
+      return { mx, my };
+    }
+
+    function setLambdaFromMouse(mx, my, shiftKey) {
+      let deg = mouseToDeg(mx, my);
+      if (!shiftKey) deg = Math.round(deg / SNAP_DEG) * SNAP_DEG;
+      deg = norm360(deg);
+
+      if (deg !== lambda0) {
+        lambda0 = deg;
+        onLambda0Change(lambda0);
+        renderUI();
+      }
+    }
+
+    ui.addEventListener("pointerdown", (e) => {
+      const { mx, my } = getMouse(e);
+      if (isOnRing(mx, my)) {
+        dragging = true;
+        ui.setPointerCapture(e.pointerId);
+        setLambdaFromMouse(mx, my, e.shiftKey);
+      }
+    });
+
+    ui.addEventListener("pointermove", (e) => {
+      const { mx, my } = getMouse(e);
+
+      const wasHover = hover;
+      hover = isOnRing(mx, my) || dragging;
+      if (hover !== wasHover) renderUI();
+
+      if (dragging) {
+        setLambdaFromMouse(mx, my, e.shiftKey);
+      }
+    });
+
+    ui.addEventListener("pointerup", (e) => {
+      if (dragging) {
+        dragging = false;
+        try { ui.releasePointerCapture(e.pointerId); } catch {}
+        renderUI();
+      }
+
+      onDragEnd(lambda0);
+    });
+
+    ui.addEventListener("pointercancel", () => {
+      dragging = false;
+      renderUI();
+    });
+
+    ui.addEventListener("dblclick", () => {
+      lambda0 = 0;
+      onLambda0Change(lambda0);
+      renderUI();
+
+      onDragEnd(lambda0);    
+    });
+
+    function onDragEnd(lambda0) {
+      onLambda0Change(lambda0);
+      map_init(map);
+    }
+
+    function setPoleAndRadius(newCx, newCy, newRingR) {
+      cx = newCx; cy = newCy; ringR = newRingR;
+      renderUI();
+    }
+    window.__ghostRingUI = { setPoleAndRadius, get lambda0() { return lambda0; } };
+
+    // Initial draw
+    const bgImg = new Image();
+    bgImg.src = "polar.png";  // your image path
+    let bgReady = false;
+  
+    bgImg.onload = () => {
+      bgReady = true;
+      renderUI();
+    };
+  };
+
+  </script>
+</body>
+
+</html>
