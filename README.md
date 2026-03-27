@@ -13,8 +13,8 @@ It is a open-source leaflet plugin which generate the vector tiles(canvas) for g
 [DEMO] (https://hunter3789.github.io/leaflet-geojson-proj4-vectortile/example/demo.html)
 - geojson data is from https://geojson-maps.ash.ms/
 
-[DEMO - Standard Longitude Control] (https://hunter3789.github.io/leaflet-geojson-proj4-vectortile/example/demo-polar-rotation.html)
-
+[DEMO - Standard Longitude Control] (https://hunter3789.github.io/leaflet-geojson-proj4-vectortile/example/demo-polar-rotation.html)  
+![demo](demo.gif)
 
 ## Installation and setup
 
