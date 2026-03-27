@@ -101,7 +101,7 @@
 
       L.graticule({ interval:20, style:{dashArray:'4,4', color:'#333', weight:1}, renderer: canvas }).addTo(map);
 
-      var tiles = new L.GridLayer({tileSize:512, pane:mapPaneName2});
+      var tiles = new L.GridLayer({tileSize:256, pane:mapPaneName2});
       tiles.createTile = function(coords) {
         var tile = L.DomUtil.create('canvas', 'leaflet-tile');
         var ctx = tile.getContext('2d');
@@ -138,7 +138,7 @@
       var data = geojsonData;
        
       getGeojsonBounds(map, data);
-      geojsonVectorTile = L.geoJson.projvt(data, {tileSize:512, pane:mapPaneName1, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
+      geojsonVectorTile = L.geoJson.projvt(data, {tileSize:256, pane:mapPaneName1, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
       geojsonVectorTile.addTo(map);
       map.fire('viewreset');
     }
@@ -156,7 +156,7 @@
         geojsonData = JSON.parse(xhr.responseText);
 
         getGeojsonBounds(map, geojsonData);
-        geojsonVectorTile = L.geoJson.projvt(geojsonData, {tileSize:512, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
+        geojsonVectorTile = L.geoJson.projvt(geojsonData, {tileSize:256, pane:pane, color: "black", fillColor: "#ffffe5", weight: 1, simplify:true, tolerance:1});
         geojsonVectorTile.addTo(map);
         geojsonWorldData = sliceGeojson(geojsonData, 126);
       }
