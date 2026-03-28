@@ -72,7 +72,12 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
         for (var k=0; k<geojson.features[i].geometry.coordinates[j].length; k++) {
           var polygon = [];
           for (var l=0; l<geojson.features[i].geometry.coordinates[j][k].length; l++) {
-            var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][l][1], geojson.features[i].geometry.coordinates[j][k][l][0]]), coords.z);
+            try {
+              var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][l][1], geojson.features[i].geometry.coordinates[j][k][l][0]]), coords.z);
+            }
+            catch (e) {
+              continue;
+            }
             polygon.push(point);
           }
 
@@ -95,7 +100,12 @@ L.GeoJSON.ProjVT = L.GridLayer.extend({
       for (var j=0; j<geojson.features[i].geometry.coordinates.length; j++) {
         var polygon = [];
         for (var k=0; k<geojson.features[i].geometry.coordinates[j].length; k++) {
-          var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][1], geojson.features[i].geometry.coordinates[j][k][0]]), coords.z);
+          try {
+            var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][1], geojson.features[i].geometry.coordinates[j][k][0]]), coords.z);
+          }
+          catch (e) {
+            continue;
+          }
           polygon.push(point);
         }
 
@@ -156,7 +166,12 @@ function getGeojsonBounds(map, geojson) {
               geojson.features[i].geometry.coordinates[j][k][l][1] = -89.999999;
             }
 
-            var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][l][1], geojson.features[i].geometry.coordinates[j][k][l][0]]), 0);
+            try {
+              var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][l][1], geojson.features[i].geometry.coordinates[j][k][l][0]]), 0);
+            }
+            catch (e) {
+              continue;
+            }
 
             if (xmax <= point.x || xmax === null) {
               xmax = point.x;
@@ -193,7 +208,12 @@ function getGeojsonBounds(map, geojson) {
             geojson.features[i].geometry.coordinates[j][k][1] = -89.999999;
           }
 
-          var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][1], geojson.features[i].geometry.coordinates[j][k][0]]), 0);
+          try {
+            var point = map.project(L.latLng([geojson.features[i].geometry.coordinates[j][k][1], geojson.features[i].geometry.coordinates[j][k][0]]), 0);
+          }
+          catch (e) {
+            continue;
+          }
 
           if (xmax <= point.x || xmax === null) {
             xmax = point.x;
